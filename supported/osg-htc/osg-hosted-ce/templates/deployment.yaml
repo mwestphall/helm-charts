@@ -47,6 +47,11 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Values.Persistence.LibCondorCeVolume }}
       {{ end }}
+      {{ if .Values.Persistence.SSHHostKeyVolume }}
+      - name: ssh-hostkey-condor-ce
+        persistentVolumeClaim:
+          claimName: {{ .Values.Persistence.SSHHostKeyVolume }}
+      {{ end }}
       - name: osg-hosted-ce-{{ .Values.Instance }}-configuration
         configMap:
           name: osg-hosted-ce-{{ .Values.Instance }}-configuration
@@ -56,6 +61,7 @@ spec:
       - name: osg-hosted-ce-{{ .Values.Instance }}-slate-scitokens
         configMap:
           name: osg-hosted-ce-{{ .Values.Instance }}-slate-scitokens
+      {{ if .Values.RemoteCluster.PrivateKeySecret }}
       - name: bosco-ssh-private-key-volume
         secret: 
           secretName: {{ .Values.RemoteCluster.PrivateKeySecret }}
@@ -63,6 +69,7 @@ spec:
           - key: bosco.key
             path: bosco.key
             mode: 256
+      {{ end }}
       {{ if .Values.RemoteCluster.SSHCertificateSecret }}
       - name: bosco-ssh-cert-volume
         secret:
@@ -201,6 +208,9 @@ spec:
           containerPort: 80
           protocol: TCP
         {{ end }}
+        - name: ssh
+          containerPort: 22
+          protocol: TCP
         env:
         {{ if eq .Values.Networking.ServiceType "HostNetwork" }}
         - name: _CONDOR_NETWORK_HOSTNAME

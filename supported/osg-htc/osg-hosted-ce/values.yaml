@@ -155,6 +155,8 @@ Persistence:
   LibCondorCeVolume: null
   # /etc/condor-ce/passwords.d
   IdtokenKeyVolume: null
+  # /etc/ssh/
+  SSHHostKeyVolume: null
 
 # Options to allow override of the bosco directory from arbitrary git repos
 # Bosco override dir lets you set what directory you want to put your bosco

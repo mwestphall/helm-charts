@@ -19,5 +19,9 @@ spec:
     - protocol: TCP
       port: 80
     {{ end }}
+    {{ if .Values.Persistence.SSHHostKeyVolume }}
+    - protocol: TCP
+      port: 22
+    {{ end }}
   egress:
   - {}
