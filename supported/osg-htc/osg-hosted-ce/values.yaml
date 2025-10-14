@@ -215,6 +215,9 @@ HostCredentials:
 Dashboard:
   Enabled: false
 
+# Choose which image to use for the specified containers
+ContainerImages:
+  HostedCE: hub.opensciencegrid.org/opensciencegrid/hosted-ce
 # Choose which tag to use for the specified containers
 ContainerTags:
   HostedCE: release

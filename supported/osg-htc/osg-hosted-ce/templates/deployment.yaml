@@ -136,7 +136,7 @@ spec:
       {{ end }}
       containers:
       - name: osg-hosted-ce
-        image: hub.opensciencegrid.org/opensciencegrid/hosted-ce:{{ .Values.ContainerTags.HostedCE }}
+        image: {{ .Values.ContainerImages.HostedCE }}:{{ .Values.ContainerTags.HostedCE }}
         imagePullPolicy: Always
         volumeMounts:
         - name: osg-hosted-ce-{{ .Values.Instance }}-configuration
@@ -196,6 +196,11 @@ spec:
         - name: osg-hosted-ce-{{ .Values.Instance }}-slate-scitokens
           mountPath: /etc/condor-ce/mapfiles.d/50-slate-scitokens.conf
           subPath: 50-slate-scitokens.conf
+        {{ end }}
+        {{ if .Values.Persistence.SSHHostKeyVolume }}
+        # Mount persistent storage for sshd host keys
+        - name: ssh-hostkey-condor-ce
+          mountPath: /mnt/ssh.orig/
         {{ end }}
         ports:
         - name: htcondor-ce
