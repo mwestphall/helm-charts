@@ -84,6 +84,11 @@ spec:
         configMap:
           name: osg-hosted-ce-{{ .Values.Instance }}-known-hosts
       {{ end }}
+      {{ if .Values.RemoteCluster.AuthorizedKeys }}
+      - name: ssh-authorized-keys
+        configMap:
+          name: osg-hosted-ce-{{ .Values.Instance }}-authorized-keys
+      {{ end }}
       {{ if .Values.HostCredentials.HostCertKeySecret }}
       - name: osg-hosted-ce-hostcertkey-volume
         secret:
@@ -154,6 +159,11 @@ spec:
         - name: ssh-known-hosts
           mountPath: /etc/osg/ssh_known_hosts
           subPath: ssh_known_hosts
+        {{ end }}
+        {{ if .Values.RemoteCluster.AuthorizedKeys }}
+        - name: ssh-authorized-keys
+          mountPath: /etc/osg/ssh_authorized_keys
+          subPath: ssh_authorized_keys
         {{ end }}
         - name: osg-hosted-ce-{{ .Values.Instance }}-htcondor-ce-configuration
           mountPath: /etc/condor-ce/config.d/90-instance.conf
