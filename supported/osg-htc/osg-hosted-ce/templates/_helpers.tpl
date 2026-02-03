@@ -20,13 +20,20 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 {{- end -}}
 
-{{- define "namespace" -}}
-{{- .Release.Namespace | trimPrefix "slate-vo-" | printf " %s" -}}
-{{- end -}}
-
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "osg-hosted-ce.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Default host cert/key secret name.
+*/}}
+{{- define "osg-hosted-ce.certname" -}}
+{{- if .Values.HostCredentials.HostCertKeySecret -}}
+{{- .Values.HostCredentials.HostCertKeySecret -}}
+{{- else -}}
+{{ include "osg-hosted-ce.name" . }}-gencert
+{{- end -}}
 {{- end -}}

@@ -1,5 +1,5 @@
 {
-    "upstream":"https://github.com/rptaylor/kapel.git",
-    "ref": "8e58b78fbecdad922b32c90dcafe21ef82e6b051",
+    "upstream":"https://github.com/rptaylor/kuantifier.git",
+    "ref": "v1.3.2",
     "chart_dir": "chart"
 }

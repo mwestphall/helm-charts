@@ -13,12 +13,6 @@ spec:
   - ports:
     - protocol: TCP
       port: 9619
-    {{ if or .Values.Dashboard.Enabled
-             ( and (not .Values.HostCredentials.HostCertKeySecret)
-                   (not .Values.HostCredentials.HostCertSecret) ) }}
-    - protocol: TCP
-      port: 80
-    {{ end }}
     {{ if .Values.Persistence.SSHHostKeyVolume }}
     - protocol: TCP
       port: 22
