@@ -221,5 +221,3 @@ data:
   ssh_authorized_keys: |+
 {{ .Values.RemoteCluster.AuthorizedKeys | indent 4}}
 {{ end }}
-
-{{ end }}
