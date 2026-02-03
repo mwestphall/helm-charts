@@ -74,7 +74,6 @@ spec:
           - key: bosco.key
             path: bosco.key
             mode: 256
-      {{ end }}
       {{ if .Values.RemoteCluster.SSHCertificateSecret }}
       - name: bosco-ssh-cert-volume
         secret:
@@ -94,7 +93,6 @@ spec:
         configMap:
           name: osg-hosted-ce-{{ .Values.Instance }}-authorized-keys
       {{ end }}
-      {{ if .Values.HostCredentials.HostCertKeySecret }}
       {{ if or .Values.HostCredentials.HostCertKeySecret .Values.HostCredentials.CreateCertificate }}
       - name: osg-hosted-ce-hostcertkey-volume
         secret:
