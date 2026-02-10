@@ -50,6 +50,8 @@ spec:
       - name: ssh-hostkey-condor-ce
         persistentVolumeClaim:
           claimName: {{ .Values.Persistence.SSHHostKeyVolume }}
+      - name: sshd-shared-vol
+        emptyDir: {}
       {{ end }}
       {{ if .Values.ExternalHTCondorCeConfig }}
       {{- range .Values.ExternalHTCondorCeConfig }}
@@ -125,6 +127,26 @@ spec:
       hostNetwork: true
       {{ end }}
       containers:
+      {{ if .Values.Persistence.SSHHostKeyVolume }}
+      - name: osg-hosted-ce-sshd
+        image: {{ .Values.ContainerImages.SSHD }}:{{ .Values.ContainerTags.SSHD }}
+        imagePullPolicy: Always
+        volumeMounts:
+        # Mount persistent storage for sshd host keys
+        - name: ssh-hostkey-condor-ce
+          mountPath: /etc/ssh.orig/
+        - name: sshd-shared-vol
+          mountPath: /tmp/
+        {{ if .Values.RemoteCluster.AuthorizedKeys }}
+        - name: ssh-authorized-keys
+          mountPath: /etc/ssh.orig/authorized_keys
+          subPath: ssh_authorized_keys
+        {{ end }}
+        ports:
+        - name: sshd
+          containerPort: 22
+          protocol: TCP
+      {{ end }}
       - name: osg-hosted-ce
         image: {{ .Values.ContainerImages.HostedCE }}:{{ .Values.ContainerTags.HostedCE }}
         imagePullPolicy: Always
@@ -150,11 +172,6 @@ spec:
         - name: ssh-known-hosts
           mountPath: /etc/osg/ssh_known_hosts
           subPath: ssh_known_hosts
-        {{ end }}
-        {{ if .Values.RemoteCluster.AuthorizedKeys }}
-        - name: ssh-authorized-keys
-          mountPath: /etc/osg/ssh_authorized_keys
-          subPath: ssh_authorized_keys
         {{ end }}
         - name: osg-hosted-ce-{{ .Values.Instance }}-htcondor-ce-configuration
           mountPath: /etc/condor-ce/config.d/90-instance.conf
@@ -189,8 +206,8 @@ spec:
         {{ end }}
         {{ if .Values.Persistence.SSHHostKeyVolume }}
         # Mount persistent storage for sshd host keys
-        - name: ssh-hostkey-condor-ce
-          mountPath: /mnt/ssh.orig/
+        - name: sshd-shared-vol
+          mountPath: /etc/condor-ce/sshd-sock/
         {{ end }}
         ports:
         - name: htcondor-ce
