@@ -23,6 +23,9 @@ spec:
         app: {{ template "osg-hosted-ce.name" . }}
         release: {{ .Release.Name }}
         instance: {{ .Values.Instance }}
+        {{ if .Values.HostCredentials.EnableSSHD }}
+        ssh-keys: {{ .Values.HostCredentials.SSHKeyForwardList }}
+        {{ end }}
         app.kubernetes.io/part-of: {{ .Chart.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
@@ -46,10 +49,13 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Values.Persistence.LibCondorCeVolume }}
       {{ end }}
-      {{ if .Values.Persistence.SSHHostKeyVolume }}
+      {{ if .Values.HostCredentials.EnableSSHD }}
       - name: ssh-hostkey-condor-ce
-        persistentVolumeClaim:
-          claimName: {{ .Values.Persistence.SSHHostKeyVolume }}
+        secret: 
+          secretName: {{ .Values.HostCredentials.HostSSHKeySecret | default (printf "%s-ssh-host-key" .Values.Instance) }}
+      - name: ssh-host-pubkey-condor-ce
+        configMap: 
+          name: {{ .Values.HostCredentials.HostSSHPubKeyConfigMap | default (printf "%s-ssh-host-pubkey" .Values.Instance) }}
       - name: sshd-shared-vol
         emptyDir: {}
       {{ end }}
@@ -127,16 +133,26 @@ spec:
       hostNetwork: true
       {{ end }}
       containers:
-      {{ if .Values.Persistence.SSHHostKeyVolume }}
+      {{ if .Values.HostCredentials.EnableSSHD }}
       - name: osg-hosted-ce-sshd
         image: {{ .Values.ContainerImages.SSHD }}:{{ .Values.ContainerTags.SSHD }}
         imagePullPolicy: Always
         volumeMounts:
-        # Mount persistent storage for sshd host keys
-        - name: ssh-hostkey-condor-ce
-          mountPath: /etc/ssh.orig/
+        # Shared volume for ssh_auth_sock
         - name: sshd-shared-vol
           mountPath: /tmp/
+
+        # Mount path for sshd host private key
+        - name: ssh-hostkey-condor-ce
+          mountPath: /etc/ssh.orig/ssh_host_rsa_key
+          subPath: ssh_host_rsa_key
+
+        # Mount for sshd host public key
+        - name: ssh-host-pubkey-condor-ce
+          mountPath: /etc/ssh.orig/ssh_host_rsa_key.pub
+          subPath: ssh_host_rsa_key.pub
+
+        # Mount for ssh client authorized_key
         {{ if .Values.RemoteCluster.AuthorizedKeys }}
         - name: ssh-authorized-keys
           mountPath: /etc/ssh.orig/authorized_keys
@@ -204,7 +220,7 @@ spec:
           mountPath: /etc/condor-ce/mapfiles.d/50-scitokens.conf
           subPath: 50-scitokens.conf
         {{ end }}
-        {{ if .Values.Persistence.SSHHostKeyVolume }}
+        {{ if .Values.HostCredentials.EnableSSHD }}
         # Mount persistent storage for sshd host keys
         - name: sshd-shared-vol
           mountPath: /etc/condor-ce/sshd-sock/

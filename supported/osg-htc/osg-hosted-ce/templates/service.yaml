@@ -22,7 +22,7 @@ spec:
     port: 9619
     targetPort: htcondor-ce
     protocol: TCP
-  {{ if .Values.Persistence.SSHHostKeyVolume }}
+  {{ if .Values.HostCredentials.HostSSHKeySecret }}
   - name: ssh
     port: 22
     targetPort: ssh

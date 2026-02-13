@@ -222,6 +222,25 @@ HostCredentials:
   # a default name will be used.
   HostCertKeySecret: null
 
+  # Whether to enable the SSH sidecar and associated configuration for allowing 
+  # SSH access to the CE host. 
+  EnableSSHD: false
+
+  # Comma-separated list of key names to forward from the Yubikey host to the CE host.
+  SSHKeyForwardList: ""
+
+  # Name of the secret containing an SSH host key for this CE.
+  # Enabling this value will create a sidecar container that runs SSHD and 
+  # forwards any incoming SSH connections to the main CE container via an
+  # SSH_AUTH_SOCK in a shared volume. 
+  # Should contain value "ssh_host_rsa_key"
+  HostSSHKeySecret: null
+
+  # The public half of the SSH host key # referenced in HostSSHKeySecret. 
+  # This must be stored separately as our agent-forwarding service has 
+  # ConfigMap read access but not Secret read access.
+  HostSSHPubKeyConfigMap: null  
+
 # Choose which image to use for the specified containers
 ContainerImages:
   HostedCE: hub.opensciencegrid.org/opensciencegrid/hosted-ce
