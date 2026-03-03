@@ -29,11 +29,6 @@ RemoteCluster:
   #    login04.osgconnect.net ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCnySArMSVd0O3UniYN4vX3a/d9d9mEMnrf2z1S900t0GrxVazVGu3ObeLfWwYRc3qFXNRPGh3mKcz5QVG6gcm4=
   #    login04.osgconnect.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJBW6weAaFSdLYksn4vIvqt4+geNVQ/bUvp71kTeQsKV
   
-  # Contents of SSH authorized_keys for the remote login host
-  AuthorizedKeys: null
-  # Example:
-  # AuthorizedKeys: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqsciY/FmcH6yedW7DxbTwLjkwlgVcbcG43QwdaSvMuN5EHAeLRH2P6ig3H6s/4hZqJn7AU2oNsoIqjZZ8iHqGyiTB9r70Aovt9PUuQXw5qHvYiIoyw49/waJ+yzu4+UD3qfnxeHuRw5EOaXia72MNJJ4lBMoS6iw1JveFJY4rBgKZ7nta1eAGGfHADsf5lfhlIXnJPN050X6zcUjqEEKXjdUkFa3wDiVbFEIESCMwi1b6Q1OXGGFwuSNse1X38CREBzQ+NjOB97o70chZoh2jZ2O3iZZZbujYcDzpxF3RxmewFC3pDmkoOpJrfV2W58n1KdJJnyvjlqEZGXCXcAlB
-
   # Secret with 'bosco.key' containing the SSH key to access LoginHost:
   PrivateKeySecret: lincolnb-bosco
   # Secret containing a signed certificate (required by some sites)
@@ -240,6 +235,11 @@ HostCredentials:
   # This must be stored separately as our agent-forwarding service has 
   # ConfigMap read access but not Secret read access.
   HostSSHPubKeyConfigMap: null  
+
+  
+  # ConfigMap containing a mapping of key name -> ce instance pairs
+  # Shared among all CEs in a namespace
+  AuthorizedKeysConfigMap: hosted-ce-key-mappings
 
 # Choose which image to use for the specified containers
 ContainerImages:

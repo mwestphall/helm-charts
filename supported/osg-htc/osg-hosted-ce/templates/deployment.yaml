@@ -97,10 +97,10 @@ spec:
         configMap:
           name: osg-hosted-ce-{{ .Values.Instance }}-known-hosts
       {{ end }}
-      {{ if .Values.RemoteCluster.AuthorizedKeys }}
+      {{ if .Values.HostCredentials.EnableSSHD }}
       - name: ssh-authorized-keys
         configMap:
-          name: osg-hosted-ce-{{ .Values.Instance }}-authorized-keys
+          name: {{ .Values.HostCredentials.AuthorizedKeysConfigMap }}
       {{ end }}
       {{ if or .Values.HostCredentials.HostCertKeySecret .Values.HostCredentials.CreateCertificate }}
       - name: osg-hosted-ce-hostcertkey-volume
@@ -138,6 +138,10 @@ spec:
       - name: osg-hosted-ce-sshd
         image: {{ .Values.ContainerImages.SSHD }}:{{ .Values.ContainerTags.SSHD }}
         imagePullPolicy: Always
+        env:
+        - name: CE_INSTANCE
+          value: {{ .Values.Instance }}
+
         volumeMounts:
         # Shared volume for ssh_auth_sock
         - name: sshd-shared-vol
@@ -154,11 +158,9 @@ spec:
           subPath: ssh_host_rsa_key.pub
 
         # Mount for ssh client authorized_key
-        {{ if .Values.RemoteCluster.AuthorizedKeys }}
         - name: ssh-authorized-keys
-          mountPath: /etc/ssh.orig/authorized_keys
-          subPath: ssh_authorized_keys
-        {{ end }}
+          mountPath: /etc/ssh.orig/key-mappings.yaml
+          subPath: key-mappings.yaml
         ports:
         - name: sshd
           containerPort: 22
