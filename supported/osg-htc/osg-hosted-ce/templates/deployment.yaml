@@ -25,6 +25,12 @@ spec:
         instance: {{ .Values.Instance }}
         app.kubernetes.io/part-of: {{ .Chart.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{ if .Values.HostCredentials.EnableSSHD }}
+        osg-htc.org/primary-key: {{ .Values.HostCredentials.AuthorizedKeys.Primary }}
+        {{ if .Values.HostCredentials.AuthorizedKeys.Secondary }}
+        osg-htc.org/secondary-key: {{ .Values.HostCredentials.AuthorizedKeys.Secondary }}
+        {{ end }}
+        {{ end }}
     spec:
       enableServiceLinks: false
       {{ if .Values.NodeSelection.Enabled }}
