@@ -96,7 +96,7 @@ spec:
       {{ if .Values.HostCredentials.EnableSSHD }}
       - name: ssh-authorized-keys
         configMap:
-          name: {{ .Values.HostCredentials.AuthorizedKeysConfigMap }}
+          name: {{ .Values.HostCredentials.AuthorizedPublicKeysConfigMap }}
       {{ end }}
       {{ if or .Values.HostCredentials.HostCertKeySecret .Values.HostCredentials.CreateCertificate }}
       - name: osg-hosted-ce-hostcertkey-volume
@@ -130,38 +130,6 @@ spec:
       hostNetwork: true
       {{ end }}
       containers:
-      {{ if .Values.HostCredentials.EnableSSHD }}
-      - name: osg-hosted-ce-sshd
-        image: {{ .Values.ContainerImages.SSHD }}:{{ .Values.ContainerTags.SSHD }}
-        imagePullPolicy: Always
-        env:
-        - name: CE_INSTANCE
-          value: {{ .Values.Instance }}
-
-        volumeMounts:
-        # Shared volume for ssh_auth_sock
-        - name: sshd-shared-vol
-          mountPath: /tmp/
-
-        # Mount path for sshd host private key
-        - name: ssh-hostkey-condor-ce
-          mountPath: /etc/ssh.orig/ssh_host_rsa_key
-          subPath: ssh_host_rsa_key
-
-        # Mount for sshd host public key
-        - name: ssh-host-pubkey-condor-ce
-          mountPath: /etc/ssh.orig/ssh_host_rsa_key.pub
-          subPath: ssh_host_rsa_key.pub
-
-        # Mount for ssh client authorized_key
-        - name: ssh-authorized-keys
-          mountPath: /etc/ssh.orig/key-mappings.yaml
-          subPath: key-mappings.yaml
-        ports:
-        - name: sshd
-          containerPort: 22
-          protocol: TCP
-      {{ end }}
       - name: osg-hosted-ce
         image: {{ .Values.ContainerImages.HostedCE }}:{{ .Values.ContainerTags.HostedCE }}
         imagePullPolicy: Always
@@ -294,3 +262,76 @@ spec:
             exec:
               command: ["/usr/local/bin/drain-ce.sh"]
         {{ end }}
+      initContainers:
+      {{ if .Values.HostCredentials.EnableSSHD }}
+      - name: osg-hosted-ce-sshd
+        image: {{ .Values.ContainerImages.SSHD }}:{{ .Values.ContainerTags.SSHD }}
+        imagePullPolicy: Always
+        restartPolicy: Always
+        env:
+        - name: CE_INSTANCE
+          value: {{ .Values.Instance }}
+        - name: AUTHORIZED_KEY
+          value: {{ .Values.HostCredentials.AuthorizedKeys.Primary }}
+
+        volumeMounts:
+        # Shared volume for ssh_auth_sock
+        - name: sshd-shared-vol
+          mountPath: /tmp/
+
+        # Mount path for sshd host private key
+        - name: ssh-hostkey-condor-ce
+          mountPath: /etc/ssh.orig/ssh_host_rsa_key
+          subPath: ssh_host_rsa_key
+
+        # Mount for sshd host public key
+        - name: ssh-host-pubkey-condor-ce
+          mountPath: /etc/ssh.orig/ssh_host_rsa_key.pub
+          subPath: ssh_host_rsa_key.pub
+
+        # Mount for ssh client authorized_key
+        - name: ssh-authorized-keys
+          mountPath: /etc/ssh.orig/key-mappings.yaml
+          subPath: key-mappings.yaml
+        ports:
+        - name: sshd
+          containerPort: 22
+          protocol: TCP
+      {{ end }}
+      {{ if and .Values.HostCredentials.EnableSSHD .Values.HostCredentials.AuthorizedKeys.Secondary }}
+      - name: osg-hosted-ce-secondary-sshd
+        image: {{ .Values.ContainerImages.SSHD }}:{{ .Values.ContainerTags.SSHD }}
+        imagePullPolicy: Always
+        restartPolicy: Always
+        env:
+        - name: CE_INSTANCE
+          value: {{ .Values.Instance }}
+        - name: AUTHORIZED_KEY
+          value: {{ .Values.HostCredentials.AuthorizedKeys.Secondary }}
+        - name: SSHD_PORT
+          value: "23"
+
+        volumeMounts:
+        # Shared volume for ssh_auth_sock
+        - name: sshd-shared-vol
+          mountPath: /tmp/
+
+        # Mount path for sshd host private key
+        - name: ssh-hostkey-condor-ce
+          mountPath: /etc/ssh.orig/ssh_host_rsa_key
+          subPath: ssh_host_rsa_key
+
+        # Mount for sshd host public key
+        - name: ssh-host-pubkey-condor-ce
+          mountPath: /etc/ssh.orig/ssh_host_rsa_key.pub
+          subPath: ssh_host_rsa_key.pub
+
+        # Mount for ssh client authorized_key
+        - name: ssh-authorized-keys
+          mountPath: /etc/ssh.orig/key-mappings.yaml
+          subPath: key-mappings.yaml
+        ports:
+        - name: sshd-backup
+          containerPort: 23
+          protocol: TCP
+      {{ end }}

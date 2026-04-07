@@ -232,9 +232,15 @@ HostCredentials:
   # ConfigMap read access but not Secret read access.
   HostSSHPubKeyConfigMap: null
 
-  # ConfigMap containing a mapping of key name -> ce instance pairs
+  # ConfigMap containing a mapping of key name -> public key pairs
   # Shared among all CEs in a namespace
-  AuthorizedKeysConfigMap: hosted-ce-key-mappings
+  AuthorizedPublicKeysConfigMap: hosted-ce-key-mappings
+  
+  # List of key names to use for SSH access to the CE host.
+  # Supports a primary and secondary key
+  AuthorizedKeys:
+    Primary: ""
+    Secondary: ""
 
 # Choose which image to use for the specified containers
 ContainerImages:
