@@ -40,7 +40,7 @@ spec:
       - name: idtoken-key-condor-ce
         secret:
           secretName: {{ .Values.Persistence.IdtokenKeySecret }}
-          defaultMode: 0600
+          defaultMode: 0o600
       {{ else if .Values.Persistence.IdtokenKeyVolume }}
       - name: idtoken-key-condor-ce
         persistentVolumeClaim:
