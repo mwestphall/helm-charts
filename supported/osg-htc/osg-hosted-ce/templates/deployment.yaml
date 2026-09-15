@@ -159,7 +159,11 @@ spec:
         - name: osg-hosted-ce-{{ .Values.Instance }}-htcondor-ce-configuration
           mountPath: /etc/condor-ce/config.d/90-instance.conf
           subPath: 90-instance.conf
-        {{ if or .Values.Persistence.IdtokenKeyVolume .Values.Persistence.IdtokenKeySecret }}
+        {{ if .Values.Persistence.IdtokenKeySecret }}
+        - name: idtoken-key-condor-ce
+          mountPath: /etc/condor-ce/passwords.d/POOL
+          subPath: POOL
+        {{ else if .Values.Persistence.IdtokenKeyVolume }}
         - name: idtoken-key-condor-ce
           mountPath: /etc/condor-ce/passwords.d/
         {{ end }}
